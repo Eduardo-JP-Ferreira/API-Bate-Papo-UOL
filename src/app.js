@@ -49,7 +49,7 @@ app.post("/participants",async (req, res) => {
             }
     
             await db.collection("participants").insertOne(novoArrayParticipante);
-            await db.collection("messages").insertOne({mensagem});
+            await db.collection("messages").insertOne(mensagem);
             return res.sendStatus(201)
         }catch (err){
             console.log(err);
