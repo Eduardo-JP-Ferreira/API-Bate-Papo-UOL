@@ -19,12 +19,32 @@ mongoClient.connect()
     .then(() => db = mongoClient.db())
     .catch((err) => console.log(err.message))
 
-// const myInterval = setInterval(VerificaTempo, 15000);
+const myInterval = setInterval(VerificaTempo, 15000);
 
-// function VerificaTempo(){
-//     // return console.log("asdad")
-//     const lista= db.collection("participants").find()
-// }
+async function VerificaTempo(){
+    // return console.log("asdad")
+    const dezSegundos = 10000
+    try{
+        const lista= await db.collection("participants").find({lastStatus: {$lt: Date.now() - dezSegundos }}).toArray()
+        lista.map(async (item) =>{
+
+            const hora = dayjs().format('HH:mm:ss')
+            const mensagem = {
+                from: item.name,
+                to: 'Todos',
+                text: 'sai da sala...',
+                type: 'status',
+                time: hora
+            }
+
+            await db.collection("messages").insertOne(mensagem);
+            await db.collection("participants").deleteOne({name: item.name});
+          })
+    }catch(res){
+        return console.log(res)
+    }
+    
+}
 
 // Endpoints
 app.post("/participants",async (req, res) => {
