@@ -19,6 +19,12 @@ mongoClient.connect()
     .then(() => db = mongoClient.db())
     .catch((err) => console.log(err.message))
 
+// const myInterval = setInterval(VerificaTempo, 15000);
+
+// function VerificaTempo(){
+//     // return console.log("asdad")
+//     const lista= db.collection("participants").find()
+// }
 
 // Endpoints
 app.post("/participants",async (req, res) => {
@@ -154,15 +160,14 @@ app.post("/status",async (req, res) => {
     const verificaNome= await db.collection("participants").findOne({ name: user })
     if(verificaNome && user !== undefined){
         try{
-                    
-            await db.collection("participants").updateOne({name: user},{$set: {lastStatus: date.now()}})
+            await db.collection("participants").updateOne({name: user},{$set: {lastStatus: Date.now()}})
             return res.sendStatus(200)
         }catch (err){
             console.log(err)
             res.sendStatus(404)
           }
     }else{
-        res.res.sendStatus(404)
+        res.sendStatus(404)
     }
     
 })
