@@ -19,40 +19,45 @@ mongoClient.connect()
     .then(() => db = mongoClient.db())
     .catch((err) => console.log(err.message))
 
-//consts Joy
-const nomeParticipante = joi.object({
-    name: joi.string().required()
-  })
-
 
 // Endpoints
 app.post("/participants",async (req, res) => {
     const {name} = req.body
+    const nomeParticipante = joi.object({
+        name: joi.string().required()
+      })
     const validate = nomeParticipante.validate(req.body)
     if (validate.error) return res.sendStatus(422)
-
-    try{
-        const novoArrayParticipante = {
-            name,
-            lastStatus: Date.now()
-        }
-
-        const hora = dayjs().format('HH:mm:ss')
-        const mensagem = {
-            from: name,
-            to: 'Todos',
-            text: 'entra na sala...',
-            type: 'status',
-            time: hora
-        }
-
-        await db.collection("participants").insertOne({novoArrayParticipante});
-        await db.collection("messages").insertOne({mensagem});
-        return res.sendStatus(201)
-    }catch (err){
-        console.log(err);
-        res.sendStatus(500);
-      }
+    const verificaNome = db.collection("participants").find().toArray()
+    // const pessoa = verificaNome.find((verificaNome)=> verificaNome.name === name)
+    // res.send(name)
+    if(verificaNome){
+        try{
+            const novoArrayParticipante = {
+                name,
+                lastStatus: Date.now()
+            }
+    
+            const hora = dayjs().format('HH:mm:ss')
+            const mensagem = {
+                from: name,
+                to: 'Todos',
+                text: 'entra na sala...',
+                type: 'status',
+                time: hora
+            }
+    
+            await db.collection("participants").insertOne(novoArrayParticipante);
+            await db.collection("messages").insertOne({mensagem});
+            return res.sendStatus(201)
+        }catch (err){
+            console.log(err);
+            res.sendStatus(500);
+          }
+    }else{
+        res.sendStatus(409);
+    }
+    
 })
 
 app.get("/participants",(req, res) => {
