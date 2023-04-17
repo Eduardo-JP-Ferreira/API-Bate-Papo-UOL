@@ -28,10 +28,11 @@ app.post("/participants",async (req, res) => {
       })
     const validate = nomeParticipante.validate(req.body)
     if (validate.error) return res.sendStatus(422)
-    const verificaNome = db.collection("participants").find().toArray()
+    // const verificaNome = db.collection("participants").find().toArray()
     // const pessoa = verificaNome.find((verificaNome)=> verificaNome.name === name)
     // res.send(name)
-    if(verificaNome){
+    const verificaNome= await db.collection("participants").findOne({ name: name })
+    if(!verificaNome){
         try{
             const novoArrayParticipante = {
                 name,
