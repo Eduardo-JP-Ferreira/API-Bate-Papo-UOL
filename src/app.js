@@ -53,11 +53,11 @@ app.post("/participants",async (req, res) => {
             await db.collection("messages").insertOne(mensagem);
             return res.sendStatus(201)
         }catch (err){
-            console.log(err);
-            res.sendStatus(500);
+            console.log(err)
+            res.sendStatus(500)
           }
     }else{
-        res.sendStatus(409);
+        res.sendStatus(409)
     }
     
 })
@@ -72,7 +72,6 @@ app.post("/messages",async (req, res) => {
     const {to, text, type} = req.body
     const {user} = req.headers
 
-    const nome = "marta"
     const mensagemPost = joi.object({
         to: joi.string().required(),
         text: joi.string().required(),
@@ -101,8 +100,8 @@ app.post("/messages",async (req, res) => {
             await db.collection("messages").insertOne(mensagem);
             return res.sendStatus(201)
         }catch (err){
-            console.log(err);
-            res.sendStatus(422);
+            console.log(err)
+            res.sendStatus(422)
           }
     }else{
         res.status(422).send(`try  ${user}`);
@@ -120,11 +119,11 @@ app.get("/messages",async (req, res) => {
             { to: user }, { from: user }]}).toArray()
             res.status(200).send(pegaMensagemToda)
         }catch(err){
-            console.log(err);
-            res.sendStatus(500);
+            console.log(err)
+            res.sendStatus(500)
         }
     }else if(limit <=0 || isNaN(limit)){
-        res.sendStatus(422);
+        res.sendStatus(422)
     }else{
         try{
             const pegaMensagemLimite = await db.collection("messages").find({$or: [{ to: 'Todos' }, 
@@ -141,13 +140,32 @@ app.get("/messages",async (req, res) => {
                 res.status(200).send(novaLista)
             }
         }catch(err){
-            console.log(err);
-            res.sendStatus(500);
+            console.log(err)
+            res.sendStatus(500)
         }
     }
 
 })
 
+app.post("/status",async (req, res) => {
+   
+    const {user} = req.headers
+     
+    const verificaNome= await db.collection("participants").findOne({ name: user })
+    if(verificaNome && user !== undefined){
+        try{
+                    
+            await db.collection("participants").updateOne({name: user},{$set: {lastStatus: date.now()}})
+            return res.sendStatus(200)
+        }catch (err){
+            console.log(err)
+            res.sendStatus(404)
+          }
+    }else{
+        res.res.sendStatus(404)
+    }
+    
+})
 
 
 // Deixa o app escutando, à espera de requisições
