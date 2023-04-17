@@ -61,10 +61,53 @@ app.post("/participants",async (req, res) => {
     
 })
 
-app.get("/participants",(req, res) => {
-    const participantes = db.collection("participants").find().toArray()
+app.get("/participants", async(req, res) => {
+    const participantes = await db.collection("participants").find().toArray()
         .then((participantes) => res.status(200).send(participantes))
         .catch((err) => res.status(500).send(err.message))
+})
+
+app.get("/messages",async (req, res) => {
+    const {user} = req.headers
+    const {limit} = req.query
+
+    if(!limit){
+        try{
+            const pegaMensagemToda = await db.collection("messages").find({$or: [{ to: 'Todos' }, 
+            { to: user }, { from: user }]}).toArray()
+            res.status(200).send(pegaMensagemToda)
+        }catch(err){
+            console.log(err);
+            res.sendStatus(500);
+        }
+    }else if(limit <=0 || isNaN(limit)){
+        res.sendStatus(422);
+    }else{
+        try{
+            const pegaMensagemLimite = await db.collection("messages").find({$or: [{ to: 'Todos' }, 
+            { to: user }, { from: user }]}).toArray()
+
+            const novaLista = []
+            if(pegaMensagemLimite.length<=limit){
+                res.status(200).send(pegaMensagemLimite)
+            }
+            else{
+                for(let i=pegaMensagemLimite.length-limit; i<pegaMensagemLimite.length;i++){
+                    novaLista.push(pegaMensagemLimite[i])
+                }
+                res.status(200).send(novaLista)
+            }
+        }catch(err){
+            console.log(err);
+            res.sendStatus(500);
+        }
+    }
+
+   
+
+
+
+
 })
 
 
