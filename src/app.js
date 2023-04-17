@@ -28,7 +28,7 @@ app.post("/participants",async (req, res) => {
       })
     const validate = nomeParticipante.validate(req.body, { abortEarly: false })
     if (validate.error) {
-        const errors = validation.error.details.map((detail) => detail.message);
+        const errors = validate.error.details.map((detail) => detail.message);
         return res.status(422).send(errors);
       }
 
